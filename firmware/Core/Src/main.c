@@ -146,6 +146,7 @@ static uint8_t MAIN_GetHALLCode(void){
   uint8_t code = (HAL_GPIO_ReadPin(HALL_H1_GPIO_Port, HALL_H1_Pin) << 2)
                | (HAL_GPIO_ReadPin(HALL_H2_GPIO_Port, HALL_H2_Pin) << 1)
                |  HAL_GPIO_ReadPin(HALL_H3_GPIO_Port, HALL_H3_Pin);
+  return code;
 }
 
 
@@ -164,6 +165,15 @@ static void MAIN_TEST_HALLOnUART(void){
     HAL_Delay(10);
   }
 }
+
+static void MAIN_TEST_HALLAndSteps(void){
+  while(1){
+    uint8_t code = MAIN_GetHALLCode();
+    MAIN_step_func[code]();
+  }
+}
+
+
 /* USER CODE END 0 */
 
 /**
@@ -198,7 +208,8 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 
-  MAIN_TEST_HALLOnUART();
+  //MAIN_TEST_HALLOnUART();
+  MAIN_TEST_HALLAndSteps();
 
   /* USER CODE END 2 */
 
