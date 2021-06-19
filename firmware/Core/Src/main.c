@@ -63,6 +63,13 @@ static void MX_TIM1_Init(void);
 /* USER CODE BEGIN 0 */
 
 
+#define TIM_CHANNEL_IN1 TIM_CHANNEL_1
+#define TIM_CHANNEL_IN2 TIM_CHANNEL_2
+#define TIM_CHANNEL_IN3 TIM_CHANNEL_3
+
+#define FIXED_PWM_PULSE       (500U)//(159U)
+#define FIXED_PWM_RUNTIME_ms  (1000U)
+
 
 //                  | Forward                | Backward
 //# H1 H2 H3 | CODE | OUT1 U  OUT2 V  OUT3 W | OUT1 U  OUT2 V  OUT3 W
@@ -81,6 +88,9 @@ static void MAIN_StepX_F(void){
   HAL_GPIO_WritePin(EN1_GPIO_Port, EN1_Pin, RESET);
   HAL_GPIO_WritePin(EN2_GPIO_Port, EN2_Pin, RESET);
   HAL_GPIO_WritePin(EN3_GPIO_Port, EN3_Pin, RESET);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN1, 0);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN2, 0);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN3, 0);
 }
 
 void MAIN_Step1_F(void){
@@ -89,6 +99,9 @@ void MAIN_Step1_F(void){
   HAL_GPIO_WritePin(EN2_GPIO_Port, EN2_Pin, RESET);
   HAL_GPIO_WritePin(EN1_GPIO_Port, EN1_Pin, SET);
   HAL_GPIO_WritePin(EN3_GPIO_Port, EN3_Pin, SET);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN1, 0);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN2, 0);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN3, FIXED_PWM_PULSE);
 }
 
 static void MAIN_Step2_F(void){
@@ -97,6 +110,9 @@ static void MAIN_Step2_F(void){
   HAL_GPIO_WritePin(EN1_GPIO_Port, EN1_Pin, RESET);
   HAL_GPIO_WritePin(EN2_GPIO_Port, EN2_Pin, SET);
   HAL_GPIO_WritePin(EN3_GPIO_Port, EN3_Pin, SET);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN1, 0);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN2, 0);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN3, FIXED_PWM_PULSE);
 }
 
 static void MAIN_Step3_F(void){
@@ -105,6 +121,9 @@ static void MAIN_Step3_F(void){
   HAL_GPIO_WritePin(EN3_GPIO_Port, EN3_Pin, RESET);
   HAL_GPIO_WritePin(EN1_GPIO_Port, EN1_Pin, SET);
   HAL_GPIO_WritePin(EN2_GPIO_Port, EN2_Pin, SET);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN1, FIXED_PWM_PULSE);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN2, 0);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN3, 0);
 }
 
 static void MAIN_Step4_F(void){
@@ -113,6 +132,9 @@ static void MAIN_Step4_F(void){
   HAL_GPIO_WritePin(EN2_GPIO_Port, EN2_Pin, RESET);
   HAL_GPIO_WritePin(EN1_GPIO_Port, EN1_Pin, SET);
   HAL_GPIO_WritePin(EN3_GPIO_Port, EN3_Pin, SET);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN1, FIXED_PWM_PULSE);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN2, 0);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN3, 0);
 }
 
 static void MAIN_Step5_F(void){
@@ -121,6 +143,9 @@ static void MAIN_Step5_F(void){
   HAL_GPIO_WritePin(EN1_GPIO_Port, EN1_Pin, RESET);
   HAL_GPIO_WritePin(EN2_GPIO_Port, EN2_Pin, SET);
   HAL_GPIO_WritePin(EN3_GPIO_Port, EN3_Pin, SET);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN1, 0);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN2, FIXED_PWM_PULSE);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN3, 0);
 }
 
 static void MAIN_Step6_F(void){
@@ -129,6 +154,9 @@ static void MAIN_Step6_F(void){
   HAL_GPIO_WritePin(EN3_GPIO_Port, EN3_Pin, RESET);
   HAL_GPIO_WritePin(EN1_GPIO_Port, EN1_Pin, SET);
   HAL_GPIO_WritePin(EN2_GPIO_Port, EN2_Pin, SET);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN1, 0);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN2, FIXED_PWM_PULSE);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_IN3, 0);
 }
 
 static MAIN_StepFunc_t MAIN_step_func[8] = {
@@ -173,6 +201,33 @@ static void MAIN_TEST_HALLAndSteps(void){
   }
 }
 
+static void MAIN_TEST_PWM(void){
+  MAIN_StepX_F();
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+  while(1){
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+    HAL_Delay(1);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 159);
+    HAL_Delay(1);
+  }
+}
+
+static void MAIN_TEST_StepsFixedPWM(void){
+  MAIN_StepX_F();
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+  uint32_t stop_time = HAL_GetTick() + FIXED_PWM_RUNTIME_ms;
+  while(HAL_GetTick() < stop_time){
+    uint8_t code = MAIN_GetHALLCode();
+    MAIN_step_func[code]();
+  }
+  MAIN_StepX_F();
+  while(1);
+}
+
 
 /* USER CODE END 0 */
 
@@ -209,7 +264,9 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   //MAIN_TEST_HALLOnUART();
-  MAIN_TEST_HALLAndSteps();
+//  MAIN_TEST_HALLAndSteps();
+//  MAIN_TEST_PWM();
+  MAIN_TEST_StepsFixedPWM();
 
   /* USER CODE END 2 */
 
@@ -316,7 +373,7 @@ static void MX_TIM1_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 159;
+  sConfigOC.Pulse = 0;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
